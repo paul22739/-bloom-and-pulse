@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Admin Dashboard — Bloom Pulse Digital</title>
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--m:#00ffaa;--cy:#00e5ff;--blk:#050505;--card:#0d0d0d;--b:rgba(255,255,255,.07);--wh:#f0f0ec;--g:rgba(255,255,255,.35)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Outfit',sans-serif;background:var(--blk);color:var(--wh);min-height:100vh}
+/* ── LOGIN ── */
+#login-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9999;background:var(--blk)}
+.login-box{width:100%;max-width:400px;background:var(--card);border:1px solid var(--b);border-radius:20px;padding:2.5rem;margin:1rem}
+.login-logo{font-family:'Bebas Neue';font-size:2rem;letter-spacing:3px;background:linear-gradient(90deg,var(--m),var(--cy));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.3rem}
+.login-sub{font-size:.75rem;color:var(--g);margin-bottom:2rem}
+.form-lbl{display:block;font-size:.6rem;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,.25);margin-bottom:.4rem}
+.form-inp{width:100%;padding:.85rem 1rem;background:rgba(255,255,255,.04);border:1px solid var(--b);border-radius:10px;color:var(--wh);font-family:'Outfit';font-size:.9rem;outline:none;margin-bottom:1rem;transition:border-color .3s}
+.form-inp:focus{border-color:var(--m)}
+.btn-primary{width:100%;padding:1rem;border-radius:12px;border:none;background:var(--m);color:var(--blk);font-family:'Outfit';font-size:.9rem;font-weight:700;cursor:pointer;transition:all .3s}
+.btn-primary:hover{opacity:.9;transform:translateY(-2px)}
+#login-err{color:#ff6b6b;font-size:.78rem;text-align:center;margin-top:.7rem;display:none}
+/* ── LAYOUT ── */
+#app{display:none;min-height:100vh}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:230px;background:var(--card);border-right:1px solid var(--b);display:flex;flex-direction:column;z-index:100}
+.sidebar-logo{padding:1.8rem 1.5rem 1.2rem;font-family:'Bebas Neue';font-size:1.4rem;letter-spacing:3px;background:linear-gradient(90deg,var(--m),var(--cy));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;border-bottom:1px solid var(--b)}
+.sidebar-logo span{display:block;font-family:'DM Mono';font-size:.6rem;-webkit-text-fill-color:rgba(255,255,255,.25);letter-spacing:2px;margin-top:.2rem}
+nav{padding:1rem 0;flex:1}
+.nav-item{display:flex;align-items:center;gap:.7rem;padding:.8rem 1.5rem;color:rgba(255,255,255,.35);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .3s;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover,.nav-item.active{color:var(--m);background:rgba(0,255,170,.05)}
+.nav-item i{font-size:1.1rem;width:20px}
+.nav-badge{margin-left:auto;background:rgba(255,68,68,.15);color:#ff6b6b;border:1px solid rgba(255,68,68,.3);border-radius:50px;font-size:.6rem;font-weight:700;padding:.1rem .5rem}
+.nav-badge.green{background:rgba(0,255,170,.1);color:var(--m);border-color:rgba(0,255,170,.3)}
+.sidebar-footer{padding:1rem 1.5rem;border-top:1px solid var(--b);font-size:.72rem;color:rgba(255,255,255,.2)}
+.main{margin-left:230px;padding:2rem;min-height:100vh}
+/* ── HEADER ── */
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem}
+.page-title{font-family:'Bebas Neue';font-size:2.5rem;letter-spacing:2px;color:var(--wh)}
+.page-sub{font-size:.78rem;color:rgba(255,255,255,.3);margin-top:.1rem}
+/* ── STATS ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+.stat-card{background:var(--card);border:1px solid var(--b);border-radius:16px;padding:1.5rem;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--m),var(--cy));opacity:0;transition:.3s}
+.stat-card:hover::before{opacity:1}
+.stat-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:.8rem;font-size:1.1rem}
+.stat-val{font-family:'Bebas Neue';font-size:3rem;color:var(--m);line-height:1}
+.stat-lbl{font-size:.65rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:.2rem}
+/* ── TABLE ── */
+.section-card{background:var(--card);border:1px solid var(--b);border-radius:16px;overflow:hidden;margin-bottom:1.5rem}
+.section-head{padding:1.2rem 1.5rem;border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between}
+.section-head h3{font-family:'Bebas Neue';font-size:1.3rem;letter-spacing:2px}
+.section-head span{font-size:.65rem;font-family:'DM Mono';color:rgba(255,255,255,.25);letter-spacing:2px}
+table{width:100%;border-collapse:collapse}
+th{padding:.8rem 1rem;background:rgba(255,255,255,.02);font-size:.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);text-align:left;border-bottom:1px solid var(--b)}
+td{padding:.85rem 1rem;font-size:.82rem;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.015)}
+.badge{display:inline-block;padding:.2rem .7rem;border-radius:50px;font-size:.65rem;font-weight:600}
+.badge-new{background:rgba(0,255,170,.1);color:var(--m);border:1px solid rgba(0,255,170,.2)}
+.badge-paid{background:rgba(0,229,255,.1);color:var(--cy);border:1px solid rgba(0,229,255,.2)}
+.badge-pending{background:rgba(255,200,60,.1);color:#ffc83c;border:1px solid rgba(255,200,60,.2)}
+.badge-failed{background:rgba(255,68,68,.1);color:#ff6b6b;border:1px solid rgba(255,68,68,.2)}
+.action-btn{padding:.3rem .8rem;border-radius:8px;border:1px solid var(--b);background:transparent;color:rgba(255,255,255,.4);font-size:.68rem;cursor:pointer;transition:all .3s;font-family:'Outfit'}
+.action-btn:hover{border-color:var(--m);color:var(--m)}
+.action-btn.danger:hover{border-color:#ff6b6b;color:#ff6b6b}
+/* ── PANELS ── */
+.panel{display:none}
+.panel.active{display:block}
+/* ── BLOG EDITOR ── */
+.editor-wrap{background:var(--card);border:1px solid var(--b);border-radius:16px;padding:2rem}
+.editor-wrap textarea{min-height:200px;resize:vertical}
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:3rem;color:rgba(255,255,255,.2)}
+.empty i{font-size:2.5rem;display:block;margin-bottom:.5rem;color:rgba(255,255,255,.1)}
+/* ── TOAST ── */
+.admin-toast{position:fixed;top:1.5rem;right:1.5rem;background:var(--m);color:var(--blk);padding:.7rem 1.4rem;border-radius:50px;font-size:.8rem;font-weight:700;z-index:99999;display:none;animation:slideIn .4s ease}
+@keyframes slideIn{from{transform:translateX(100px);opacity:0}to{transform:none;opacity:1}}
+/* ── RESPONSIVE ── */
+@media(max-width:900px){.stats-row{grid-template-columns:1fr 1fr}.sidebar{width:60px}.sidebar-logo,.nav-item span,.sidebar-footer{display:none}.nav-item{justify-content:center;padding:.8rem}.main{margin-left:60px}}
+</style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Bloom Pulse</div>
+    <div class="login-sub">Admin Dashboard — Restricted Access</div>
+    <label class="form-lbl">Email Address</label>
+    <input class="form-inp" id="a-email" type="email" placeholder="paulrav2@gmail.com">
+    <label class="form-lbl">Password</label>
+    <input class="form-inp" id="a-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')adminLogin()">
+    <button class="btn-primary" onclick="adminLogin()">Sign In</button>
+    <div id="login-err">Invalid email or password. Please try again.</div>
+  </div>
+</div>
+
+<!-- Admin App -->
+<div id="app">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo">Bloom Pulse<span>Admin Panel</span></div>
+    <nav>
+      <button class="nav-item active" onclick="showPanel('dashboard')"><i class="ri-dashboard-line"></i><span>Dashboard</span></button>
+      <button class="nav-item" onclick="showPanel('leads')"><i class="ri-contacts-line"></i><span>Leads</span><span class="nav-badge" id="badge-leads">0</span></button>
+      <button class="nav-item" onclick="showPanel('payments')"><i class="ri-bank-card-line"></i><span>Payments</span></button>
+      <button class="nav-item" onclick="showPanel('reviews')"><i class="ri-star-line"></i><span>Reviews</span><span class="nav-badge" id="badge-reviews">0</span></button>
+      <button class="nav-item" onclick="showPanel('blog')"><i class="ri-quill-pen-line"></i><span>Blog CMS</span></button>
+      <button class="nav-item" onclick="showPanel('clients')"><i class="ri-user-line"></i><span>Clients</span></button>
+    </nav>
+    <div class="sidebar-footer">Bloom Pulse Digital<br>© 2026 — Admin v1.0</div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main">
+    <div class="admin-toast" id="admin-toast"></div>
+
+    <!-- ── DASHBOARD ── -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="page-header">
+        <div><div class="page-title">Dashboard</div><div class="page-sub">Welcome back, Paul. Here's what's happening today.</div></div>
+        <button onclick="loadDashboard()" style="padding:.5rem 1.2rem;border-radius:50px;border:1px solid var(--b);background:transparent;color:rgba(255,255,255,.4);font-size:.72rem;cursor:pointer" title="Refresh"><i class="ri-refresh-line"></i> Refresh</button>
+      </div>
+      <div class="stats-row" id="dash-stats">
+        <div class="stat-card"><div class="stat-ico" style="background:rgba(0,255,170,.1)">📋</div><div class="stat-val" id="s-bookings">—</div><div class="stat-lbl">Total Bookings</div></div>
+        <div class="stat-card"><div class="stat-ico" style="background:rgba(0,229,255,.1)">💰</div><div class="stat-val" id="s-revenue">—</div><div class="stat-lbl">Revenue (paid)</div></div>
+        <div class="stat-card"><div class="stat-ico" style="background:rgba(181,0,255,.1)">💬</div><div class="stat-val" id="s-contacts">—</div><div class="stat-lbl">Contacts</div></div>
+        <div class="stat-card"><div class="stat-ico" style="background:rgba(255,107,53,.1)">⭐</div><div class="stat-val" id="s-reviews">—</div><div class="stat-lbl">Pending Reviews</div></div>
+      </div>
+      <div class="section-card">
+        <div class="section-head"><h3>Recent Bookings</h3><span>Latest 5</span></div>
+        <table><thead><tr><th>Name</th><th>Service</th><th>Budget</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+        <tbody id="dash-bookings"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table>
+      </div>
+      <div class="section-card">
+        <div class="section-head"><h3>Recent Payments</h3><span>Confirmed paid</span></div>
+        <table><thead><tr><th>Gateway</th><th>Name/Phone</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody id="dash-payments"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <!-- ── LEADS ── -->
+    <div class="panel" id="panel-leads">
+      <div class="page-header"><div><div class="page-title">Leads</div><div class="page-sub">All service bookings and contact form submissions.</div></div></div>
+      <div class="section-card">
+        <div class="section-head"><h3>Service Bookings</h3><span id="bookings-count">—</span></div>
+        <table><thead><tr><th>Name</th><th>Email</th><th>Service</th><th>Budget</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+        <tbody id="bookings-table"></tbody></table>
+      </div>
+      <div class="section-card" style="margin-top:1.5rem">
+        <div class="section-head"><h3>Contact Form Submissions</h3><span id="contacts-count">—</span></div>
+        <table><thead><tr><th>Name</th><th>Email</th><th>Company</th><th>Service</th><th>Message</th><th>Date</th></tr></thead>
+        <tbody id="contacts-table"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ── PAYMENTS ── -->
+    <div class="panel" id="panel-payments">
+      <div class="page-header"><div><div class="page-title">Payments</div><div class="page-sub">All payment records — M-Pesa, Stripe, PayPal.</div></div></div>
+      <div class="section-card">
+        <div class="section-head"><h3>All Transactions</h3><span id="payments-count">—</span></div>
+        <table><thead><tr><th>Gateway</th><th>Name / Phone</th><th>Amount</th><th>Currency</th><th>Status</th><th>Reference</th><th>Date</th></tr></thead>
+        <tbody id="payments-table"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ── REVIEWS ── -->
+    <div class="panel" id="panel-reviews">
+      <div class="page-header"><div><div class="page-title">Reviews</div><div class="page-sub">Approve reviews before they appear publicly on the website.</div></div></div>
+      <div id="reviews-container"></div>
+    </div>
+
+    <!-- ── BLOG CMS ── -->
+    <div class="panel" id="panel-blog">
+      <div class="page-header">
+        <div><div class="page-title">Blog CMS</div><div class="page-sub">Create, edit and manage blog posts.</div></div>
+        <button onclick="showBlogEditor()" style="padding:.6rem 1.4rem;border-radius:50px;border:none;background:var(--m);color:var(--blk);font-weight:700;font-size:.78rem;cursor:pointer"><i class="ri-add-line"></i> New Post</button>
+      </div>
+      <!-- Editor -->
+      <div id="blog-editor" style="display:none" class="editor-wrap">
+        <h3 style="font-family:'Bebas Neue';font-size:1.5rem;letter-spacing:2px;margin-bottom:1.5rem" id="editor-title-label">New Blog Post</h3>
+        <input type="hidden" id="edit-post-id">
+        <label class="form-lbl">Post Title *</label>
+        <input class="form-inp" id="edit-title" placeholder="How AI is reshaping...">
+        <label class="form-lbl">Category</label>
+        <input class="form-inp" id="edit-category" placeholder="AI · Strategy">
+        <label class="form-lbl">Author</label>
+        <input class="form-inp" id="edit-author" placeholder="Philip Karanja">
+        <label class="form-lbl">Excerpt (shown on blog listing)</label>
+        <input class="form-inp" id="edit-excerpt" placeholder="Short summary of the post...">
+        <label class="form-lbl">Featured Image URL</label>
+        <input class="form-inp" id="edit-image" placeholder="https://images.unsplash.com/...">
+        <label class="form-lbl">Content (HTML supported)</label>
+        <textarea class="form-inp" id="edit-content" placeholder="<p>Your blog post content here...</p>"></textarea>
+        <div style="display:flex;align-items:center;gap:1rem;margin-top:1rem">
+          <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.82rem;color:rgba(255,255,255,.5)">
+            <input type="checkbox" id="edit-published" style="accent-color:var(--m)"> Publish immediately
+          </label>
+          <button onclick="saveBlogPost()" style="padding:.7rem 1.8rem;border-radius:50px;border:none;background:var(--m);color:var(--blk);font-weight:700;font-size:.82rem;cursor:pointer">Save Post</button>
+          <button onclick="document.getElementById('blog-editor').style.display='none'" style="padding:.7rem 1.4rem;border-radius:50px;border:1px solid var(--b);background:transparent;color:rgba(255,255,255,.4);font-size:.82rem;cursor:pointer">Cancel</button>
+        </div>
+      </div>
+      <!-- Posts list -->
+      <div class="section-card">
+        <div class="section-head"><h3>All Posts</h3><span id="blog-count">—</span></div>
+        <table><thead><tr><th>Title</th><th>Category</th><th>Author</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+        <tbody id="blog-table"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ── CLIENTS ── -->
+    <div class="panel" id="panel-clients">
+      <div class="page-header"><div><div class="page-title">Client Portal</div><div class="page-sub">All registered client accounts and their projects.</div></div></div>
+      <div class="section-card">
+        <div class="section-head"><h3>Registered Clients</h3><span id="clients-count">—</span></div>
+        <table><thead><tr><th>Name</th><th>Email</th><th>Company</th><th>Projects</th><th>Joined</th><th>Action</th></tr></thead>
+        <tbody id="clients-table"></tbody></table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API = '';
+let adminToken = localStorage.getItem('bp_admin_token') || '';
+
+// ── AUTO LOGIN if token exists ──────────────────────────
+if (adminToken) tryAutoLogin();
+
+async function tryAutoLogin() {
+  try {
+    const res = await fetch(API + '/api/admin/dashboard', {
+      headers: { Authorization: 'Bearer ' + adminToken }
+    });
+    if (res.ok) { showApp(); loadDashboard(); }
+    else { adminToken = ''; localStorage.removeItem('bp_admin_token'); }
+  } catch {}
+}
+
+async function adminLogin() {
+  const email = document.getElementById('a-email').value.trim();
+  const pass  = document.getElementById('a-pass').value;
+  const err   = document.getElementById('login-err');
+  err.style.display = 'none';
+
+  try {
+    const res  = await fetch(API + '/api/admin/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pass })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    adminToken = data.token;
+    localStorage.setItem('bp_admin_token', adminToken);
+    showApp();
+    loadDashboard();
+  } catch(e) {
+    err.textContent = e.message || 'Login failed.';
+    err.style.display = 'block';
+  }
+}
+
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+}
+
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  document.querySelector(`[onclick="showPanel('${id}')"]`).classList.add('active');
+  // Load data for panel
+  const loaders = { leads: loadLeads, payments: loadPayments, reviews: loadReviews, blog: loadBlog, clients: loadClients, dashboard: loadDashboard };
+  loaders[id]?.();
+}
+
+function authHeaders() { return { 'Content-Type': 'application/json', Authorization: 'Bearer ' + adminToken }; }
+
+function fmtDate(d) { return new Date(d).toLocaleDateString('en-KE', { day:'numeric', month:'short', year:'numeric' }); }
+
+function toast(msg) {
+  const t = document.getElementById('admin-toast');
+  t.textContent = msg; t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 3000);
+}
+
+function badgeHtml(status) {
+  const map = { new:'badge-new', paid:'badge-paid', pending:'badge-pending', failed:'badge-failed', unpaid:'badge-pending' };
+  return `<span class="badge ${map[status]||'badge-new'}">${status||'new'}</span>`;
+}
+
+// ── DASHBOARD ─────────────────────────────────────────
+async function loadDashboard() {
+  try {
+    const res  = await fetch(API + '/api/admin/dashboard', { headers: authHeaders() });
+    const data = await res.json();
+    if (!data.success) return;
+    const s = data.stats;
+    document.getElementById('s-bookings').textContent = s.totalBookings;
+    document.getElementById('s-revenue').textContent  = '$' + parseFloat(s.totalRevenue||0).toFixed(0);
+    document.getElementById('s-contacts').textContent = s.totalContacts;
+    document.getElementById('s-reviews').textContent  = s.pendingReviews;
+    document.getElementById('badge-leads').textContent    = s.newBookings || 0;
+    document.getElementById('badge-reviews').textContent  = s.pendingReviews || 0;
+
+    // Recent bookings
+    const bt = document.getElementById('dash-bookings');
+    bt.innerHTML = data.recentBookings?.length ? data.recentBookings.map(b => `
+      <tr>
+        <td><strong>${b.name}</strong><br><span style="font-size:.72rem;color:rgba(255,255,255,.3)">${b.email}</span></td>
+        <td>${b.service||'—'}</td><td>${b.budget||'—'}</td>
+        <td>${badgeHtml(b.status)}</td>
+        <td style="font-size:.72rem;color:rgba(255,255,255,.3)">${fmtDate(b.createdAt)}</td>
+        <td><button class="action-btn" onclick="replyEmail('${b.email}','${b.name}','${b.service}')">Reply</button></td>
+      </tr>`).join('') : '<tr><td colspan="6"><div class="empty"><i class="ri-inbox-line"></i>No bookings yet</div></td></tr>';
+
+    const pt = document.getElementById('dash-payments');
+    pt.innerHTML = data.recentPayments?.length ? data.recentPayments.map(p => `
+      <tr>
+        <td><span style="text-transform:uppercase;font-weight:700;font-size:.75rem;color:var(--m)">${p.gateway||'—'}</span></td>
+        <td>${p.name||p.phone||p.email||'—'}</td>
+        <td style="color:var(--m);font-weight:700">${p.currency==='KES'?'KES ':'$'}${parseFloat(p.amount||0).toFixed(2)}</td>
+        <td>${badgeHtml(p.status)}</td>
+        <td style="font-size:.72rem;color:rgba(255,255,255,.3)">${fmtDate(p.paidAt||p.createdAt)}</td>
+      </tr>`).join('') : '<tr><td colspan="5"><div class="empty"><i class="ri-bank-card-line"></i>No paid payments yet</div></td></tr>';
+
+  } catch(e) { console.error(e); }
+}
+
+// ── LEADS ─────────────────────────────────────────────
+async function loadLeads() {
+  try {
+    const res  = await fetch(API + '/api/admin/leads', { headers: authHeaders() });
+    const data = await res.json();
+    document.getElementById('bookings-count').textContent = (data.bookings?.length||0) + ' records';
+    document.getElementById('contacts-count').textContent = (data.contacts?.length||0) + ' records';
+
+    document.getElementById('bookings-table').innerHTML = data.bookings?.length ? data.bookings.map(b => `
+      <tr>
+        <td><strong>${b.name}</strong></td>
+        <td><a href="mailto:${b.email}" style="color:var(--m);text-decoration:none">${b.email}</a></td>
+        <td>${b.service||'—'}</td><td>${b.budget||'—'}</td>
+        <td>${badgeHtml(b.status)}</td>
+        <td style="font-size:.72rem;color:rgba(255,255,255,.3)">${fmtDate(b.createdAt)}</td>
+        <td style="display:flex;gap:.4rem;flex-wrap:wrap">
+          <button class="action-btn" onclick="replyEmail('${b.email}','${b.name}','${b.service}')">Reply</button>
+          <button class="action-btn" onclick="markBooking('${b.id}','contacted')">Mark Contacted</button>
+          <button class="action-btn" onclick="openPayForBooking('${b.id}','${b.name}')">Send Pay Link</button>
+        </td>
+      </tr>`).join('') : '<tr><td colspan="7"><div class="empty"><i class="ri-inbox-line"></i>No bookings yet</div></td></tr>';
+
+    document.getElementById('contacts-table').innerHTML = data.contacts?.length ? data.contacts.map(c => `
+      <tr>
+        <td><strong>${c.name}</strong></td>
+        <td><a href="mailto:${c.email}" style="color:var(--m);text-decoration:none">${c.email}</a></td>
+        <td>${c.company||'—'}</td><td>${c.service||'—'}</td>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem;color:rgba(255,255,255,.45)">${c.message||'—'}</td>
+        <td style="font-size:.72rem;color:rgba(255,255,255,.3)">${fmtDate(c.createdAt)}</td>
+      </tr>`).join('') : '<tr><td colspan="6"><div class="empty"><i class="ri-chat-1-line"></i>No contacts yet</div></td></tr>';
+  } catch(e) { console.error(e); }
+}
+
+async function markBooking(id, status) {
+  await fetch(API + '/api/admin/leads/booking/' + id, {
+    method: 'PUT', headers: authHeaders(), body: JSON.stringify({ status })
+  });
+  toast('✓ Booking marked as ' + status);
+  loadLeads();
+}
+
+function replyEmail(email, name, service) {
+  window.open(`mailto:${email}?subject=Re: Your ${service} Enquiry — Bloom Pulse Digital&body=Hi ${name},%0A%0AThank you for your enquiry...`);
+}
+function openPayForBooking(id, name) { toast('Share payment link: ' + window.location.origin + '/?pay=1&order=' + id); }
+
+// ── PAYMENTS ──────────────────────────────────────────
+async function loadPayments() {
+  try {
+    const res  = await fetch(API + '/api/admin/payments', { headers: authHeaders() });
+    const data = await res.json();
+    document.getElementById('payments-count').textContent = (data.payments?.length||0) + ' records';
+
+    document.getElementById('payments-table').innerHTML = data.payments?.length ? data.payments.map(p => `
+      <tr>
+        <td><span style="text-transform:uppercase;font-weight:700;font-size:.75rem;color:var(--m)">${p.gateway}</span></td>
+        <td>${p.name||p.phone||p.email||'—'}</td>
+        <td style="font-weight:700;color:${p.status==='paid'?'var(--m)':'rgba(255,255,255,.4)'}">${p.currency==='KES'?'KES ':'$'}${parseFloat(p.amount||0).toFixed(2)}</td>
+        <td>${p.currency||'USD'}</td>
+        <td>${badgeHtml(p.status)}</td>
+        <td style="font-size:.68rem;color:rgba(255,255,255,.25);font-family:'DM Mono'">${p.mpesaCode||p.stripeIntentId?.slice(0,16)||p.paypalOrderId?.slice(0,16)||'—'}</td>
+        <td style="font-size:.72rem;color:rgba(255,255,255,.3)">${fmtDate(p.createdAt)}</td>
+      </tr>`).join('') : '<tr><td colspan="7"><div class="empty"><i class="ri-bank-card-line"></i>No payments yet</div></td></tr>';
+  } catch(e) { console.error(e); }
+}
+
+// ── REVIEWS ───────────────────────────────────────────
+async function loadReviews() {
+  try {
+    const res  = await fetch(API + '/api/admin/reviews', { headers: authHeaders() });
+    const data = await res.json();
+    const container = document.getElementById('reviews-container');
+
+    container.innerHTML = data.reviews?.length ? data.reviews.map(r => `
+      <div style="background:var(--card);border:1px solid ${r.approved?'rgba(0,255,170,.2)':'var(--b)'};border-radius:14px;padding:1.5rem;margin-bottom:1rem;display:flex;align-items:flex-start;justify-content:space-between;gap:1.5rem;flex-wrap:wrap">
+        <div style="flex:1">
+          <div style="color:var(--m);font-size:.85rem;margin-bottom:.3rem">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div>
+          <p style="font-size:.85rem;color:rgba(255,255,255,.6);font-style:italic;margin-bottom:.6rem;line-height:1.7">${r.text}</p>
+          <div style="font-size:.78rem;font-weight:700">${r.name}</div>
+          <div style="font-size:.7rem;color:rgba(255,255,255,.3)">${r.company||''} ${r.service?'· '+r.service:''} · ${fmtDate(r.createdAt)}</div>
+        </div>
+        <div style="display:flex;gap:.5rem;flex-shrink:0">
+          ${r.approved
+            ? `<button class="action-btn danger" onclick="reviewAction('${r.id}',false)">Unpublish</button>`
+            : `<button class="action-btn" onclick="reviewAction('${r.id}',true)" style="border-color:var(--m);color:var(--m)">✓ Approve</button>
+               <button class="action-btn danger" onclick="reviewAction('${r.id}',false)">Reject</button>`
+          }
+        </div>
+      </div>`).join('') : '<div class="empty"><i class="ri-star-line"></i><br>No reviews yet</div>';
+  } catch(e) { console.error(e); }
+}
+
+async function reviewAction(id, approve) {
+  await fetch(API + '/api/reviews/' + id, {
+    method: 'PUT', headers: authHeaders(), body: JSON.stringify({ approved: approve })
+  });
+  toast(approve ? '✓ Review approved and published!' : '✓ Review unpublished.');
+  loadReviews();
+}
+
+// ── BLOG ─────────────────────────────────────────────
+let blogPosts = [];
+async function loadBlog() {
+  try {
+    const res  = await fetch(API + '/api/blog', { headers: authHeaders() });
+    const data = await res.json();
+    blogPosts = data.posts || [];
+    document.getElementById('blog-count').textContent = blogPosts.length + ' posts';
+
+    document.getElementById('blog-table').innerHTML = blogPosts.length ? blogPosts.map(p => `
+      <tr>
+        <td><strong>${p.title}</strong></td>
+        <td style="font-size:.72rem;color:rgba(255,255,255,.4)">${p.category||'—'}</td>
+        <td style="font-size:.72rem;color:rgba(255,255,255,.4)">${p.author||'—'}</td>
+        <td><span class="badge ${p.published?'badge-paid':'badge-pending'}">${p.published?'Published':'Draft'}</span></td>
+        <td style="font-size:.72rem;color:rgba(255,255,255,.3)">${fmtDate(p.date)}</td>
+        <td style="display:flex;gap:.4rem">
+          <button class="action-btn" onclick="editPost('${p.id}')">Edit</button>
+          <button class="action-btn danger" onclick="deletePost('${p.id}')">Delete</button>
+        </td>
+      </tr>`).join('') : '<tr><td colspan="6"><div class="empty"><i class="ri-article-line"></i>No posts yet. Click + New Post.</div></td></tr>';
+  } catch(e) { console.error(e); }
+}
+
+function showBlogEditor(post) {
+  const ed = document.getElementById('blog-editor');
+  ed.style.display = 'block';
+  document.getElementById('editor-title-label').textContent = post ? 'Edit Post' : 'New Blog Post';
+  document.getElementById('edit-post-id').value    = post?.id || '';
+  document.getElementById('edit-title').value      = post?.title || '';
+  document.getElementById('edit-category').value   = post?.category || '';
+  document.getElementById('edit-author').value     = post?.author || '';
+  document.getElementById('edit-excerpt').value    = post?.excerpt || '';
+  document.getElementById('edit-image').value      = post?.image || '';
+  document.getElementById('edit-content').value    = post?.content || '';
+  document.getElementById('edit-published').checked = post?.published || false;
+  ed.scrollIntoView({ behavior: 'smooth' });
+}
+
+function editPost(id) { showBlogEditor(blogPosts.find(p => p.id === id)); }
+
+async function saveBlogPost() {
+  const id = document.getElementById('edit-post-id').value;
+  const body = {
+    title:     document.getElementById('edit-title').value.trim(),
+    category:  document.getElementById('edit-category').value.trim(),
+    author:    document.getElementById('edit-author').value.trim(),
+    excerpt:   document.getElementById('edit-excerpt').value.trim(),
+    image:     document.getElementById('edit-image').value.trim(),
+    content:   document.getElementById('edit-content').value.trim(),
+    published: document.getElementById('edit-published').checked
+  };
+  if (!body.title || !body.content) { toast('Title and content are required!'); return; }
+
+  const url    = id ? API + '/api/blog/' + id : API + '/api/blog';
+  const method = id ? 'PUT' : 'POST';
+  const res    = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(body) });
+  const data   = await res.json();
+  if (data.success) {
+    toast(id ? '✓ Post updated!' : '✓ Post created!');
+    document.getElementById('blog-editor').style.display = 'none';
+    loadBlog();
+  }
+}
+
+async function deletePost(id) {
+  if (!confirm('Delete this post? This cannot be undone.')) return;
+  await fetch(API + '/api/blog/' + id, { method: 'DELETE', headers: authHeaders() });
+  toast('✓ Post deleted.');
+  loadBlog();
+}
+
+// ── CLIENTS ───────────────────────────────────────────
+async function loadClients() {
+  // Clients data from portal registrations stored in data/clients.json
+  // For now show placeholder — real data is in clients.json on your server
+  document.getElementById('clients-count').textContent = 'See data/clients.json on your server';
+  document.getElementById('clients-table').innerHTML = `<tr><td colspan="6">
+    <div class="empty"><i class="ri-user-line"></i>Client data is stored in <strong>data/clients.json</strong> on your server.<br>
+    <span style="font-size:.72rem">Open that file to view all registered clients and their hashed passwords.</span>
+    </div></td></tr>`;
+}
+
+// Initial load
+loadDashboard();
+</script>
+</body>
+</html>
